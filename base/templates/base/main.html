@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description"
+        content="This is to do list implemented using Django by Dennis Ivy who is a full stack web developer.">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>To Do Items</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap" rel="stylesheet">
+
+    <style>
+        /* 全局样式 */
+body {
+    background-color: #FAFAFA;
+    font-family: 'Nunito', sans-serif;
+    padding-top: 50px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Raleway', sans-serif;
+}
+
+p {
+    color: #4b5156;
+}
+
+a {
+    color: #4b5156;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* 容器样式 */
+.container {
+    max-width: 550px;
+    margin: auto;
+    background-color: #fff;
+    box-shadow: 2px 2px 13px -4px rgba(0, 0, 0, 0.21);
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* 输入框和文本域样式 */
+input {
+    outline: none;
+    border: none;
+}
+
+input[type="text"],
+input[type="password"],
+textarea {
+    border: 1px solid #757575;
+    border-radius: 5px;
+    padding: 10px;
+    width: 90%;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+    border-color: #999;
+}
+
+::placeholder {
+    font-weight: 300;
+    opacity: 0.5;
+    color: #999;
+}
+
+/* 标签样式 */
+label {
+    padding-top: 0% !important;
+    display: block;
+    font-weight: bold;
+}
+
+/* 按钮样式 */
+.button {
+    border: 1px solid #757575;
+    background-color: #EB796F;
+    color: #fff;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/* 头部栏样式 */
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px 5px 0 0;
+    background: linear-gradient(90deg, #EEA390 0%, #EB796F 43%, #EB796F 100%);
+}
+
+.header-bar a {
+    color: #f7f7f7;
+}
+
+/* 任务项容器 */
+.task-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background-color: #fff;
+    border-top: 1px solid #dfe4ea;
+    overflow: hidden;
+    /* margin-bottom: 15px; */
+}
+
+/* 任务标题 */
+.task-title {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+}
+
+.task-title a {
+    text-decoration: none;
+    color: #4b5156;
+    margin-left: 10px;
+}
+
+/* 任务状态图标 */
+.task-complete-icon,
+.task-incomplete-icon {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+}
+
+.task-complete-icon {
+    background-color: rgb(105, 192, 105);
+}
+
+.task-incomplete-icon {
+    background-color: rgb(218, 218, 218);
+}
+
+/* 任务重要性标签 */
+.task-priority {
+    margin-left: 20px;
+    margin-right: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.priority-低 {
+    background-color: #4caf50;
+}
+
+.priority-中 {
+    background-color: #ff9800;
+}
+
+.priority-高 {
+    background-color: #f44336;
+}
+
+/* 任务详情 */
+.task-details small {
+    display: block;
+    color: #555;
+    line-height: 1.5;
+    text-align: center;
+    margin-top: 13%;
+}
+
+/* 任务控件 */
+.task-controls {
+    display: flex;
+    align-items: center;
+}
+
+.delete-link {
+    color: #e53935;
+    text-decoration: none;
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+/* 拖拽手柄 */
+.handle {
+    display: inline-block;
+    padding: 20px 16px;
+    cursor: move;
+    user-select: none;
+    color: #aaa;
+    font-size: 18px;
+}
+
+.handle:after,
+.handle:before {
+    display: block;
+    content: "";
+}
+
+.handle:active,
+.handle:active:before,
+.handle:active:after {
+    cursor: grabbing;
+}
+
+/* 拖拽效果 */
+.dropArea {
+    background-color: #f1f2f6;
+    color: black;
+    border: #ced6e0 1px solid;
+}
+
+.selectedTask {
+    opacity: 0.6;
+}
+
+/* 添加任务按钮 */
+#add-link {
+    color: #EB796F;
+    text-decoration: none;
+    font-size: 42px;
+    text-shadow: 1px 1px #81413b;
+    margin-left: 10px;
+}
+
+/* 搜索和排序容器 */
+#search-sort-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0px;
+}
+
+/* 搜索部分 */
+#search-add-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+}
+
+#search-add-wrapper form {
+    display: flex;
+    align-items: center;
+}
+
+#search-add-wrapper input[type="text"] {
+    margin-right: 5px;
+}
+
+#search-add-wrapper .button {
+    margin-right: 10px;
+}
+
+#search-add-wrapper form a#add-link {
+    margin-left: 10px;
+    font-size: 24px;
+    text-decoration: none;
+}
+
+/* 排序部分 */
+#sort-wrapper {
+    display: flex;
+    align-items: center;
+    margin-left: 15px;
+}
+
+#sort-wrapper label {
+    font-weight: bold;
+    margin-right: 8px;
+    color: #333;
+}
+
+#sort-select {
+    padding: 6px 12px;
+    margin-right: 15px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #333;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,<SVG_DATA>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+}
+
+#sort-select:hover {
+    border-color: #999;
+}
+
+#sort-select:focus {
+    border-color: #666;
+    box-shadow: 0 0 5px rgba(102, 102, 102, 0.5);
+}
+
+/* 媒体查询 */
+@media screen and (max-width: 320px) {
+    #search-add-wrapper {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 600px) {
+    #sort-wrapper {
+        margin-top: 10px;
+    }
+
+    #sort-select {
+        width: 100%;
+    }
+}
+
+    </style>
+    
+</head>
+
+<body>
+
+    <div class="container">
+        {% block content %} {% endblock content %}
+    </div>
+
+</body>
+
+
+</html>

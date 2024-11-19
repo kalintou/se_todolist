@@ -1,0 +1,25 @@
+{% extends 'base/main.html' %}
+{% block content %}
+
+<div class="header-bar">
+    <h1>登录</h1>
+</div>
+
+<div class="card-body">
+    <form method="POST">
+        {% csrf_token %}
+        <p>
+            <label for="{{ form.username.id_for_label }}">用户名:</label>
+            {{ form.username }}
+        </p>
+        <p>
+            <label for="{{ form.password.id_for_label }}">密码:</label>
+            {{ form.password }}
+        </p>
+        <input class="button" type="submit" value="登录">
+    </form>
+    <p>没有账号? <a href="{% url 'register' %}">注册</a></p>
+</div>
+
+
+{% endblock content %}

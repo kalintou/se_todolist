@@ -1,0 +1,134 @@
+<!-- task_list.html -->
+{% extends 'base/main.html' %}
+{% load static %}
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+<div class="header-bar">
+    <div>
+        <h1>你好！ {{request.user|title}}</h1>
+        <h3 style="margin:0">你有 <i>{{count}}</i> 个未完成的任务</h3>
+    </div>
+
+    {% if request.user.is_authenticated %}
+    <a href="{% url 'logout' %}">注销</a>
+    {% else %}
+    <a href="{% url 'login' %}">登录</a>
+    {% endif %}
+</div>
+
+<div id="search-sort-wrapper">
+    <div id="search-add-wrapper">
+        <form method="GET">
+            <input type="text" name="search-area" placeholder="查找任务" value="{{ search_input }}">
+            <input class="button" type="submit" value="查找">
+            <!-- 保留当前的排序参数 -->
+            <input type="hidden" name="sort" value="{{ current_sort }}">
+            {% if tasks|length > 0 %}
+            <a id="add-link" href="{% url 'task-create' %}">&#x2b;</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- 添加排序选项 -->
+    <div id="sort-wrapper">
+        <label for="sort-select">排序方式: </label>
+        <select id="sort-select" name="sort">
+            <option value="manual" {% if current_sort == 'manual' %}selected{% endif %}>手动排序</option>
+            <option value="due_date_asc" {% if current_sort == 'due_date_asc' %}selected{% endif %}>过期日期升序</option>
+            <option value="due_date_desc" {% if current_sort == 'due_date_desc' %}selected{% endif %}>过期日期降序</option>
+            <option value="created_asc" {% if current_sort == 'created_asc' %}selected{% endif %}>创建时间升序</option>
+            <option value="created_desc" {% if current_sort == 'created_desc' %}selected{% endif %}>创建时间降序</option>
+            <!-- 新增排序选项 -->
+            <option value="priority_asc" {% if current_sort == 'priority_asc' %}selected{% endif %}>优先级升序</option>
+            <option value="priority_desc" {% if current_sort == 'priority_desc' %}selected{% endif %}>优先级降序</option>
+        </select>
+    </div>
+</div>
+
+<!-- Hidden form. Form submits new item positions -->
+<form style="display: none;" id="reorderForm" method="post" action="{% url 'task-reorder' %}">
+    {% csrf_token %}
+    <input type="hidden" id="positionInput" name="position">
+</form>
+
+<div id="tasklist" class="task-items-wrapper">
+    {% for task in tasks %}
+    <div class="task-wrapper" data-position="{{task.pk}}">
+        <div class="task-title">
+            <!-- 显示任务的重要性 -->
+            <div class="task-priority priority-{{ task.priority }}">
+                {{ task.priority }}
+            </div>
+            {% if task.complete %}
+            <i><s><a href="{% url 'task-update' task.id %}">{{ task.title }}</a></s></i>
+            {% else %}
+            <a href="{% url 'task-update' task.id %}">{{ task.title }}</a>
+            {% endif %}
+        </div>
+        <div class="task-details">
+            {% if task.due_date %}
+            <small>过期日期: {{ task.due_date|date:"Y-m-d H:i" }}</small>
+            {% endif %}
+        </div>
+
+        <div class="task-controls">
+            <a class="delete-link" href="{% url 'task-delete' task.id %}">&#215;</a>
+            <span class="handle">&nbsp;&#10247;</span>
+        </div>
+    </div>
+    {% empty %}
+    <div style="text-align: center; padding-bottom: 10px; line-height: 1em;">
+        <h3>没有新任务.</h3>
+        <h3>创建一个 <a style="text-decoration: none; color: #e53935;" href="{% url 'task-create' %}">新任务</a> ! </h3>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    
+    
+    document.getElementById('sort-select').addEventListener('change', function() {
+        var sortValue = this.value;
+        var searchInput = "{{ search_input }}";
+        var url = "?sort=" + sortValue;
+        if (searchInput) {
+            url += "&search-area=" + encodeURIComponent(searchInput);
+        }
+        window.location.href = url;
+    });
+
+    var taskList = document.getElementById("tasklist");
+    var reorderForm = document.getElementById("reorderForm");
+    var positionInput = document.getElementById("positionInput");
+    var currentSort = "{{ current_sort }}";
+
+    let sortable = null;
+
+    // 仅当按手动排序时启用拖拽排序
+    if (currentSort === 'manual') {
+        sortable = Sortable.create(taskList, {
+            handle: '.handle',
+            ghostClass: 'dropArea',
+            chosenClass: 'selectedTask',
+            onEnd: function (evt) {
+                reordering();
+            },
+        });
+    }
+
+    function reordering() {
+        const rows = document.getElementsByClassName("task-wrapper");
+        let pos = [];
+        for (let row of rows) {
+            pos.push(row.dataset.position);
+        }
+        console.log(pos.join(","))
+        positionInput.value = pos.join(',');
+        reorderForm.submit();
+    }
+</script>
+
+
+{% endblock content %}

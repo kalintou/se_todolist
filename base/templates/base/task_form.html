@@ -1,0 +1,43 @@
+{% extends 'base/main.html' %}
+{% block content %}
+
+<div class="header-bar">
+    <a href="{% url 'tasks' %}">&#8592; 返回</a>
+</div>
+
+
+<div class="card-body">
+    <!-- <form method="POST" action="">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input class="button" type="submit" value="Submit">
+    </form> -->
+
+    <form method="POST">
+        
+        {% csrf_token %}
+        <label for="id_title">标题:</label>
+        {{ form.title }}
+
+        <label for="id_description">描述:</label>
+        {{ form.description }}
+
+        <label for="id_due_date">过期日期:</label>
+        {{ form.due_date }}
+
+        <label for="id_priority">优先度:</label>
+        {{ form.priority }}
+
+        <label for="id_complete">完成:</label>
+        {{ form.complete }}
+
+        <div>
+            <input class="button" type="submit" value="发送">
+        </div>
+    </form>
+</div>
+
+
+{% endblock content %}
+
+
